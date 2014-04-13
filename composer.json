@@ -12,8 +12,8 @@
 
     },
     "autoload": {
-    	"psr-4": {
-    		"Byscripts\\Bundle\\FormHandlerBundle\\": "src/"
-    	}
+        "psr-4": {
+           "Byscripts\\Bundle\\FormHandlerBundle\\": "src/"
+        }
     }
 }
