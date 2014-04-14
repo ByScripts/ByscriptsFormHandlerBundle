@@ -1,6 +1,7 @@
 {
     "name": "byscripts/form-handler-bundle",
-    "version": "0.1.0",
+    "type": "symfony-bundle",
+    "description": "A simple bundle to handle form submission to lighten the controllers",
     "license": "MIT",
     "authors": [
         {
@@ -9,7 +10,12 @@
         }
     ],
     "require": {
-
+        "php": ">=5.3.0",
+        "symfony/dependency-injection": "~2.3",
+        "symfony/config": "~2.3",
+        "symfony/http-kernel": "~2.3",
+        "symfony/http-foundation": "~2.3",
+        "symfony/form": "~2.3"
     },
     "autoload": {
         "psr-4": {
