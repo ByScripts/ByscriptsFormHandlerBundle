@@ -34,11 +34,11 @@ abstract class AbstractFormHandler
 
         if($form->isSubmitted()) {
             if ($form->isValid()) {
-                $this->onValid($form);
+                $this->onValid($form, $options);
 
                 return true;
             } else {
-                $this->onInvalid($form);
+                $this->onInvalid($form, $options);
 
                 return false;
             }
@@ -51,6 +51,6 @@ abstract class AbstractFormHandler
 
     function onInvalid(FormInterface $form, array $options = array())
     {
-        
+
     }
 }
