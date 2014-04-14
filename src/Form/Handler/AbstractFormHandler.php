@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Byscripts\Bundle\Form\HandlerBundle\FormHandler;
+namespace Byscripts\Bundle\FormHandlerBundle\Form\Handler;
 
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
