@@ -6,7 +6,7 @@ namespace Byscripts\Bundle\FormHandlerBundle\Form\Handler;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-abstract class AbstractFormHandler implements FormHandlerInterface
+abstract class AbstractFormHandler
 {
     /**
      * @var Request
@@ -18,7 +18,13 @@ abstract class AbstractFormHandler implements FormHandlerInterface
         $this->request = $request;
     }
 
-    function process(FormInterface $form)
+    /**
+     * @param FormInterface $form
+     * @param array         $options
+     *
+     * @return bool
+     */
+    function process(FormInterface $form, array $options = array())
     {
         if (null === $this->request) {
             return false;
@@ -39,5 +45,12 @@ abstract class AbstractFormHandler implements FormHandlerInterface
         }
 
         return false;
+    }
+
+    abstract function onValid(FormInterface $form, array $options = array());
+
+    function onInvalid(FormInterface $form, array $options = array())
+    {
+        
     }
 }
