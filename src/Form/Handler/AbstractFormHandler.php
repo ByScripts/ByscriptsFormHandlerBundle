@@ -34,23 +34,35 @@ abstract class AbstractFormHandler
 
         if($form->isSubmitted()) {
             if ($form->isValid()) {
-                $this->onValid($form, $options);
-
-                return true;
+                return $this->onValid($form, $options);
             } else {
-                $this->onInvalid($form, $options);
-
-                return false;
+                return $this->onInvalid($form, $options);
             }
         }
 
         return false;
     }
 
+    /**
+     * Triggered when the form is valid
+     *
+     * @param FormInterface $form
+     * @param array         $options
+     *
+     * @return bool The value returned by the process() method
+     */
     abstract function onValid(FormInterface $form, array $options = array());
 
+    /**
+     * Triggered when the form is invalid
+     *
+     * @param FormInterface $form
+     * @param array         $options
+     *
+     * @return bool The value returned by the process() method
+     */
     function onInvalid(FormInterface $form, array $options = array())
     {
-
+        return false;
     }
 }
