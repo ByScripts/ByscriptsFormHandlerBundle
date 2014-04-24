@@ -3,6 +3,7 @@
 
 namespace Byscripts\Bundle\FormHandlerBundle\Form\Handler;
 
+use Byscripts\Notifier\Notification\Notification;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -20,12 +21,15 @@ abstract class AbstractFormHandler
 
     /**
      * @param FormInterface $form
+     * @param Notification  $notification
      * @param array         $options
      *
      * @return bool
      */
-    function process(FormInterface $form, array $options = array())
+    function process(FormInterface $form, Notification &$notification = null, array $options = array())
     {
+        Notification::ensure($notification);
+
         if (null === $this->request) {
             return false;
         }
@@ -34,9 +38,9 @@ abstract class AbstractFormHandler
 
         if($form->isSubmitted()) {
             if ($form->isValid()) {
-                return $this->onValid($form, $options);
+                return $this->onValid($form, $notification, $options);
             } else {
-                return $this->onInvalid($form, $options);
+                return $this->onInvalid($form, $notification, $options);
             }
         }
 
@@ -47,21 +51,23 @@ abstract class AbstractFormHandler
      * Triggered when the form is valid
      *
      * @param FormInterface $form
+     * @param Notification  $notification
      * @param array         $options
      *
      * @return bool The value returned by the process() method
      */
-    abstract function onValid(FormInterface $form, array $options = array());
+    abstract function onValid(FormInterface $form, Notification $notification, array $options = array());
 
     /**
      * Triggered when the form is invalid
      *
      * @param FormInterface $form
+     * @param Notification  $notification
      * @param array         $options
      *
      * @return bool The value returned by the process() method
      */
-    function onInvalid(FormInterface $form, array $options = array())
+    function onInvalid(FormInterface $form, Notification $notification, array $options = array())
     {
         return false;
     }
