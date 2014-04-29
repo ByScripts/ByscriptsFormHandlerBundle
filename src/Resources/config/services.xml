@@ -5,9 +5,12 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
-        <service id="byscripts_form_handler.form_handler" class="Byscripts\Bundle\FormHandlerBundle\FormHandler\AbstractFormHandler" abstract="true">
+        <service id="byscripts_form_handler.form_handler" abstract="true">
             <call method="setRequest">
                 <argument type="service" id="request" on-invalid="null" strict="false"/>
+            </call>
+            <call method="setFormFactory">
+                <argument type="service" id="form.factory"/>
             </call>
         </service>
     </services>

@@ -1,43 +1,115 @@
 <?php
-
+/*
+ * This file is part of the ByscriptsFormHandlerBundle package.
+ *
+ * (c) Thierry Goettelmann <thierry@byscripts.info>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Byscripts\Bundle\FormHandlerBundle\FormHandler;
 
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
 use Symfony\Component\HttpFoundation\Request;
 
-abstract class AbstractFormHandler implements FormHandlerInterface
+/**
+ * Class AbstractFormHandler
+ *
+ * @author Thierry Goettelmann <thierry@byscripts.info>
+ */
+abstract class AbstractFormHandler
 {
+    /**
+     * @var FormFactoryInterface
+     */
+    protected $factory;
+
+    /**
+     * @var FormInterface
+     */
+    protected $form;
+
     /**
      * @var Request
      */
-    private $request;
+    protected $request;
 
-    function setRequest(Request $request = null)
+    /**
+     * @param FormFactoryInterface $factory
+     */
+    public function setFormFactory(FormFactoryInterface $factory)
+    {
+        $this->factory = $factory;
+    }
+
+    /**
+     * @param Request $request
+     */
+    public function setRequest(Request $request = null)
     {
         $this->request = $request;
     }
 
-    function process(FormInterface $form)
+    /**
+     * @param null  $data
+     * @param array $options
+     *
+     * @return bool
+     */
+    public function process($data = null, array $options = array())
     {
         if (null === $this->request) {
             return false;
         }
 
-        $form->handleRequest($this->request);
+        $this->createForm($data, $options);
 
-        if($form->isSubmitted()) {
-            if ($form->isValid()) {
-                $this->onValid($form);
+        $this->form->handleRequest($this->request);
 
-                return true;
-            } else {
-                $this->onInvalid($form);
+        if ($this->form->isValid()) {
+            $this->onValid();
 
-                return false;
-            }
+            return true;
+        } else {
+            return false;
         }
+    }
 
-        return false;
+    /**
+     * @return mixed
+     */
+    abstract protected function getFormType();
+
+    /**
+     * @return mixed
+     */
+    abstract protected function onValid();
+
+    /**
+     * @param       $data
+     * @param array $options
+     */
+    private function createForm($data, array $options)
+    {
+        $this->form = $this->factory->create($this->getFormType(), $data, $options);
+    }
+
+    /**
+     * @return FormInterface
+     */
+    public function getForm()
+    {
+        return $this->form;
+    }
+
+    /**
+     * @return FormView
+     */
+    public function getFormView()
+    {
+        return $this->form->createView();
     }
 }

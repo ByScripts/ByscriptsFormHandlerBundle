@@ -1,6 +1,14 @@
 {
     "name": "byscripts/form-handler-bundle",
-    "version": "0.1.0",
+    "require": {
+        "symfony/dependency-injection": "~2.3",
+        "symfony/config": "~2.3",
+        "symfony/http-kernel": "~2.3",
+        "symfony/form": "~2.3"
+    },
+    "require-dev": {
+        "symfony/framework-standard-edition": "~2.3"
+    },
     "license": "MIT",
     "authors": [
         {
@@ -8,12 +16,9 @@
             "email": "thierry@byscripts.info"
         }
     ],
-    "require": {
-
-    },
     "autoload": {
         "psr-4": {
-           "Byscripts\\Bundle\\FormHandlerBundle\\": "src/"
+            "Byscripts\\Bundle\\FormHandlerBundle\\": "src/"
         }
     }
 }
