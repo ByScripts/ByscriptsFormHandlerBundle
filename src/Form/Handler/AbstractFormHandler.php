@@ -1,74 +1,115 @@
 <?php
-
+/*
+ * This file is part of the ByscriptsFormHandlerBundle package.
+ *
+ * (c) Thierry Goettelmann <thierry@byscripts.info>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Byscripts\Bundle\FormHandlerBundle\Form\Handler;
 
-use Byscripts\Notifier\Notification\Notification;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
 use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * Class AbstractFormHandler
+ *
+ * @author Thierry Goettelmann <thierry@byscripts.info>
+ */
 abstract class AbstractFormHandler
 {
     /**
+     * @var FormFactoryInterface
+     */
+    protected $factory;
+
+    /**
+     * @var FormInterface
+     */
+    protected $form;
+
+    /**
      * @var Request
      */
-    private $request;
+    protected $request;
 
-    function setRequest(Request $request = null)
+    /**
+     * @param FormFactoryInterface $factory
+     */
+    public function setFormFactory(FormFactoryInterface $factory)
+    {
+        $this->factory = $factory;
+    }
+
+    /**
+     * @param Request $request
+     */
+    public function setRequest(Request $request = null)
     {
         $this->request = $request;
     }
 
     /**
-     * @param FormInterface $form
-     * @param Notification  $notification
-     * @param array         $options
+     * @param null  $data
+     * @param array $options
      *
      * @return bool
      */
-    function process(FormInterface $form, Notification &$notification = null, array $options = array())
+    public function process($data = null, array $options = array())
     {
-        Notification::ensure($notification);
-
         if (null === $this->request) {
             return false;
         }
 
-        $form->handleRequest($this->request);
+        $this->createForm($data, $options);
 
-        if($form->isSubmitted()) {
-            if ($form->isValid()) {
-                return $this->onValid($form, $notification, $options);
-            } else {
-                return $this->onInvalid($form, $notification, $options);
-            }
+        $this->form->handleRequest($this->request);
+
+        if ($this->form->isValid()) {
+            $this->onValid();
+
+            return true;
+        } else {
+            return false;
         }
-
-        return false;
     }
 
     /**
-     * Triggered when the form is valid
-     *
-     * @param FormInterface $form
-     * @param Notification  $notification
-     * @param array         $options
-     *
-     * @return bool The value returned by the process() method
+     * @return mixed
      */
-    abstract function onValid(FormInterface $form, Notification $notification, array $options = array());
+    abstract protected function getFormType();
 
     /**
-     * Triggered when the form is invalid
-     *
-     * @param FormInterface $form
-     * @param Notification  $notification
-     * @param array         $options
-     *
-     * @return bool The value returned by the process() method
+     * @return mixed
      */
-    function onInvalid(FormInterface $form, Notification $notification, array $options = array())
+    abstract protected function onValid();
+
+    /**
+     * @param       $data
+     * @param array $options
+     */
+    private function createForm($data, array $options)
     {
-        return false;
+        $this->form = $this->factory->create($this->getFormType(), $data, $options);
+    }
+
+    /**
+     * @return FormInterface
+     */
+    public function getForm()
+    {
+        return $this->form;
+    }
+
+    /**
+     * @return FormView
+     */
+    public function getFormView()
+    {
+        return $this->form->createView();
     }
 }
