@@ -12,6 +12,7 @@ namespace Byscripts\Bundle\FormHandlerBundle\Form\Handler;
 
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormTypeInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -38,6 +39,26 @@ abstract class AbstractFormHandler
     protected $request;
 
     /**
+     * @var FormTypeInterface
+     */
+    protected $formType;
+
+    /**
+     * @var string
+     */
+    protected $formTypeClass;
+
+    /**
+     * @var bool
+     */
+    protected $processed = false;
+
+    public function __construct($formType)
+    {
+        $this->setFormType($formType);
+    }
+
+    /**
      * @param FormFactoryInterface $factory
      */
     public function setFormFactory(FormFactoryInterface $factory)
@@ -55,17 +76,27 @@ abstract class AbstractFormHandler
 
     /**
      * @param null  $data
-     * @param array $options
+     * @param array $formTypeArguments
+     * @param array $formOptions
      *
+     * @throws \Exception
      * @return bool
      */
-    public function process($data = null, array $options = array())
+    public function process($data = null, array $formTypeArguments = array(), array $formOptions = array())
     {
         if (null === $this->request) {
             return false;
         }
 
-        $this->createForm($data, $options);
+        if ($this->processed) {
+            throw new \Exception('Form has already been processed');
+        }
+
+        $this->processed = true;
+
+        $this->createFormType($formTypeArguments);
+
+        $this->createForm($data, $formOptions);
 
         $this->form->handleRequest($this->request);
 
@@ -76,25 +107,6 @@ abstract class AbstractFormHandler
         } else {
             return false;
         }
-    }
-
-    /**
-     * @return mixed
-     */
-    abstract protected function getFormType();
-
-    /**
-     * @return mixed
-     */
-    abstract protected function onValid();
-
-    /**
-     * @param       $data
-     * @param array $options
-     */
-    private function createForm($data, array $options)
-    {
-        $this->form = $this->factory->create($this->getFormType(), $data, $options);
     }
 
     /**
@@ -111,5 +123,54 @@ abstract class AbstractFormHandler
     public function getFormView()
     {
         return $this->form->createView();
+    }
+
+    public function setFormType($formType)
+    {
+        if (is_string($formType)) {
+            $this->formTypeClass = $formType;
+        } elseif (!$formType instanceof FormTypeInterface) {
+            throw new \Exception('$formType should be either a class name or an instance of FormTypeInterface');
+        } else {
+            $this->formType = $formType;
+        }
+    }
+
+    /**
+     * @return mixed
+     */
+    abstract protected function onValid();
+
+    /**
+     * @param mixed $data
+     * @param array $options
+     */
+    private function createForm($data, array $options)
+    {
+        if (null !== $this->form) {
+            return;
+        }
+
+        $this->form = $this->factory->create($this->formType, $data, $options);
+    }
+
+    private function createFormType($arguments)
+    {
+        if (null !== $this->formType) {
+            return;
+        }
+
+        if (empty($arguments)) {
+            $this->formType = new $this->formTypeClass;
+        } else {
+            $reflection = new \ReflectionClass($this->formTypeClass);
+
+            $this->formType = $reflection->newInstanceArgs($arguments);
+        }
+    }
+
+    public function getData()
+    {
+        return $this->getForm()->getData();
     }
 }
