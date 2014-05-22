@@ -53,6 +53,16 @@ abstract class AbstractFormHandler
      */
     protected $processed = false;
 
+    /**
+     * @var bool
+     */
+    protected $prepared = false;
+
+    /**
+     * @param string|object $formType
+     *
+     * @throws \Exception
+     */
     public function __construct($formType)
     {
         $this->setFormType($formType);
@@ -75,7 +85,33 @@ abstract class AbstractFormHandler
     }
 
     /**
-     * @param null  $data
+     * @param mixed $data
+     * @param array $formTypeArguments
+     * @param array $formOptions
+     *
+     * @return $this|bool
+     */
+    public function prepare($data = null, array $formTypeArguments = array(), array $formOptions = array())
+    {
+        if (null === $this->request) {
+            return false;
+        }
+
+        if ($this->prepared) {
+            return $this;
+        }
+
+        $this->prepared = true;
+
+        $this->createFormType($formTypeArguments);
+        $this->createForm($data, $formOptions);
+        $this->form->handleRequest($this->request);
+
+        return $this;
+    }
+
+    /**
+     * @param mixed $data
      * @param array $formTypeArguments
      * @param array $formOptions
      *
@@ -94,11 +130,7 @@ abstract class AbstractFormHandler
 
         $this->processed = true;
 
-        $this->createFormType($formTypeArguments);
-
-        $this->createForm($data, $formOptions);
-
-        $this->form->handleRequest($this->request);
+        $this->prepare($data, $formTypeArguments, $formOptions);
 
         if ($this->form->isValid()) {
             $this->onValid();
